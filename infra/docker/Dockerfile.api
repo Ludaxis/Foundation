@@ -1,0 +1,47 @@
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@8 --activate
+
+# Copy workspace files
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml* ./
+COPY packages/psl-runtime/package.json ./packages/psl-runtime/
+COPY services/core/package.json ./services/core/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy source
+COPY packages/psl-runtime ./packages/psl-runtime
+COPY services/core ./services/core
+COPY tsconfig.base.json ./
+
+# Build
+RUN pnpm --filter @foundation/psl-runtime build
+RUN pnpm --filter @foundation/core build
+
+# Production image
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@8 --activate
+
+# Copy built files
+COPY --from=builder /app/packages/psl-runtime/dist ./packages/psl-runtime/dist
+COPY --from=builder /app/packages/psl-runtime/package.json ./packages/psl-runtime/
+COPY --from=builder /app/services/core/dist ./services/core/dist
+COPY --from=builder /app/services/core/package.json ./services/core/
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/pnpm-workspace.yaml ./
+COPY --from=builder /app/package.json ./
+
+ENV NODE_ENV=production
+ENV PORT=4000
+
+EXPOSE 4000
+
+CMD ["node", "services/core/dist/server.js"]

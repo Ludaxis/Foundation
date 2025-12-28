@@ -1,0 +1,27 @@
+{
+  "name": "@foundation/worker",
+  "version": "0.1.0",
+  "description": "Foundation Dev Worker Service - Background job processing",
+  "type": "module",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@foundation/psl-runtime": "workspace:*",
+    "bullmq": "^5.1.0",
+    "ioredis": "^5.3.2",
+    "pino": "^8.17.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "pino-pretty": "^10.3.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.1.0"
+  }
+}

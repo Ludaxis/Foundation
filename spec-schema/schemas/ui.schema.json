@@ -1,0 +1,329 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://foundation.dev/schemas/ui.schema.json",
+  "title": "UI Specification",
+  "description": "Screens, layouts, and component definitions",
+  "type": "object",
+  "properties": {
+    "theme": { "$ref": "#/definitions/theme" },
+    "layouts": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/layout" }
+    },
+    "screens": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/screen" }
+    },
+    "components": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/component" }
+    }
+  },
+  "definitions": {
+    "theme": {
+      "type": "object",
+      "properties": {
+        "primary_color": { "type": "string" },
+        "font_family": { "type": "string" },
+        "border_radius": { "type": "string" },
+        "spacing_unit": { "type": "integer" }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["dashboard", "auth", "blank", "sidebar", "full"]
+        },
+        "sidebar": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/navItem" }
+            }
+          }
+        },
+        "header": {
+          "type": "object",
+          "properties": {
+            "show_user_menu": { "type": "boolean", "default": true },
+            "show_tenant_switcher": { "type": "boolean", "default": false }
+          }
+        }
+      }
+    },
+    "navItem": {
+      "type": "object",
+      "required": ["label", "flow"],
+      "properties": {
+        "label": { "type": "string" },
+        "flow": { "type": "string" },
+        "icon": { "type": "string" },
+        "badge": { "type": "string" }
+      }
+    },
+    "screen": {
+      "type": "object",
+      "required": ["layout_type"],
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "layout_type": {
+          "type": "string",
+          "enum": ["form", "list", "detail", "dashboard", "wizard", "custom"]
+        },
+        "layout": { "type": "string" },
+        "entity": { "type": "string" },
+        "load_action": { "type": "string" },
+        "submit_action": { "type": "string" },
+        "sections": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/section" }
+        },
+        "table": { "$ref": "#/definitions/tableConfig" },
+        "form": { "$ref": "#/definitions/formConfig" },
+        "detail": { "$ref": "#/definitions/detailConfig" },
+        "actions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/screenAction" }
+        }
+      }
+    },
+    "section": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["fields", "table", "card", "stats", "chart", "custom"]
+        },
+        "title": { "type": "string" },
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/fieldConfig" }
+        },
+        "component": { "type": "string" }
+      }
+    },
+    "fieldConfig": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "label": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "text", "textarea", "number", "decimal", "email", "phone", "url",
+            "password", "date", "datetime", "time", "select", "multi-select",
+            "checkbox", "radio", "switch", "file", "image", "rich-text",
+            "currency", "percentage", "hidden"
+          ]
+        },
+        "placeholder": { "type": "string" },
+        "help_text": { "type": "string" },
+        "readonly": { "type": "boolean", "default": false },
+        "hidden": { "type": "boolean", "default": false },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "value": {},
+              "label": { "type": "string" }
+            }
+          }
+        },
+        "options_from": {
+          "type": "object",
+          "properties": {
+            "action": { "type": "string" },
+            "value_field": { "type": "string" },
+            "label_field": { "type": "string" }
+          }
+        },
+        "validation": {
+          "type": "object",
+          "properties": {
+            "required": { "type": "boolean" },
+            "min": { "type": "number" },
+            "max": { "type": "number" },
+            "pattern": { "type": "string" }
+          }
+        },
+        "col_span": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "conditional": {
+          "type": "object",
+          "properties": {
+            "show_when": { "type": "string" },
+            "hide_when": { "type": "string" }
+          }
+        }
+      }
+    },
+    "tableConfig": {
+      "type": "object",
+      "properties": {
+        "columns": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/columnConfig" }
+        },
+        "sortable": { "type": "boolean", "default": true },
+        "filterable": { "type": "boolean", "default": true },
+        "searchable": { "type": "boolean", "default": true },
+        "paginated": { "type": "boolean", "default": true },
+        "selectable": { "type": "boolean", "default": false },
+        "row_actions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/rowAction" }
+        },
+        "bulk_actions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/bulkAction" }
+        },
+        "empty_state": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "description": { "type": "string" },
+            "action": { "$ref": "#/definitions/screenAction" }
+          }
+        }
+      }
+    },
+    "columnConfig": {
+      "type": "object",
+      "required": ["field"],
+      "properties": {
+        "field": { "type": "string" },
+        "header": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["text", "number", "currency", "date", "datetime", "badge", "link", "avatar", "boolean", "custom"]
+        },
+        "sortable": { "type": "boolean", "default": true },
+        "filterable": { "type": "boolean", "default": true },
+        "width": { "type": "string" },
+        "format": { "type": "string" },
+        "link_to": { "type": "string" },
+        "badge_colors": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "rowAction": {
+      "type": "object",
+      "required": ["label", "action"],
+      "properties": {
+        "label": { "type": "string" },
+        "action": { "type": "string" },
+        "icon": { "type": "string" },
+        "variant": {
+          "type": "string",
+          "enum": ["default", "destructive", "outline"]
+        },
+        "confirm": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "message": { "type": "string" }
+          }
+        },
+        "condition": { "type": "string" }
+      }
+    },
+    "bulkAction": {
+      "type": "object",
+      "required": ["label", "action"],
+      "properties": {
+        "label": { "type": "string" },
+        "action": { "type": "string" },
+        "icon": { "type": "string" },
+        "confirm": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "message": { "type": "string" }
+          }
+        }
+      }
+    },
+    "formConfig": {
+      "type": "object",
+      "properties": {
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/fieldConfig" }
+        },
+        "columns": { "type": "integer", "minimum": 1, "maximum": 4, "default": 1 },
+        "submit_label": { "type": "string", "default": "Submit" },
+        "cancel_label": { "type": "string", "default": "Cancel" },
+        "show_reset": { "type": "boolean", "default": false }
+      }
+    },
+    "detailConfig": {
+      "type": "object",
+      "properties": {
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/fieldConfig" }
+        },
+        "sections": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/section" }
+        },
+        "related": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "entity": { "type": "string" },
+              "title": { "type": "string" },
+              "screen": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "screenAction": {
+      "type": "object",
+      "required": ["label"],
+      "properties": {
+        "label": { "type": "string" },
+        "action": { "type": "string" },
+        "flow": { "type": "string" },
+        "icon": { "type": "string" },
+        "variant": {
+          "type": "string",
+          "enum": ["default", "primary", "secondary", "destructive", "outline", "ghost"]
+        },
+        "position": {
+          "type": "string",
+          "enum": ["header", "footer", "inline"]
+        }
+      }
+    },
+    "component": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "props": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "required": { "type": "boolean" },
+              "default": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}

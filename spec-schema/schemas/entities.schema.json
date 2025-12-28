@@ -1,0 +1,175 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://foundation.dev/schemas/entities.schema.json",
+  "title": "Entities Specification",
+  "description": "Data model definitions for Foundation Dev",
+  "type": "object",
+  "required": ["entities"],
+  "properties": {
+    "entities": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/entity" }
+    }
+  },
+  "definitions": {
+    "entity": {
+      "type": "object",
+      "required": ["fields"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "table": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Override table name (defaults to snake_case of entity name)"
+        },
+        "tenant_scoped": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether this entity is scoped to a tenant"
+        },
+        "auditable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether changes are logged to audit trail"
+        },
+        "immutable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether records can be updated after creation"
+        },
+        "soft_delete": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use soft delete instead of hard delete"
+        },
+        "ai_writable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether AI can directly write to this entity"
+        },
+        "ai_suggest_only": {
+          "type": "boolean",
+          "default": false,
+          "description": "AI can only suggest changes, human approval required"
+        },
+        "fields": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/field" }
+        },
+        "indexes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/index" }
+        },
+        "constraints": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/constraint" }
+        },
+        "relations": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/relation" }
+        }
+      }
+    },
+    "field": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "uuid", "string", "text", "integer", "bigint", "decimal", "float",
+            "boolean", "date", "datetime", "timestamp", "json", "jsonb",
+            "enum", "array"
+          ]
+        },
+        "description": { "type": "string" },
+        "required": { "type": "boolean", "default": false },
+        "unique": { "type": "boolean", "default": false },
+        "default": {},
+        "generated": {
+          "type": "string",
+          "enum": ["uuid", "now", "auto_increment"]
+        },
+        "primary": { "type": "boolean", "default": false },
+        "nullable": { "type": "boolean" },
+        "length": { "type": "integer", "minimum": 1 },
+        "precision": { "type": "integer", "minimum": 1 },
+        "scale": { "type": "integer", "minimum": 0 },
+        "enum_values": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "array_of": { "type": "string" },
+        "reference": {
+          "type": "object",
+          "properties": {
+            "entity": { "type": "string" },
+            "field": { "type": "string", "default": "id" },
+            "on_delete": {
+              "type": "string",
+              "enum": ["cascade", "restrict", "set_null", "no_action"],
+              "default": "restrict"
+            }
+          }
+        },
+        "validation": {
+          "type": "object",
+          "properties": {
+            "min": { "type": "number" },
+            "max": { "type": "number" },
+            "min_length": { "type": "integer" },
+            "max_length": { "type": "integer" },
+            "pattern": { "type": "string" },
+            "format": {
+              "type": "string",
+              "enum": ["email", "url", "phone", "currency", "percentage"]
+            }
+          }
+        }
+      }
+    },
+    "index": {
+      "type": "object",
+      "required": ["fields"],
+      "properties": {
+        "name": { "type": "string" },
+        "fields": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "unique": { "type": "boolean", "default": false },
+        "where": { "type": "string", "description": "Partial index condition" }
+      }
+    },
+    "constraint": {
+      "type": "object",
+      "required": ["type", "expression"],
+      "properties": {
+        "name": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["check", "unique", "exclude"]
+        },
+        "expression": { "type": "string" }
+      }
+    },
+    "relation": {
+      "type": "object",
+      "required": ["type", "target"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["has_one", "has_many", "belongs_to", "many_to_many"]
+        },
+        "target": { "type": "string" },
+        "through": { "type": "string" },
+        "foreign_key": { "type": "string" },
+        "inverse": { "type": "string" }
+      }
+    }
+  }
+}

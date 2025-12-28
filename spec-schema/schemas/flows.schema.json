@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://foundation.dev/schemas/flows.schema.json",
+  "title": "Flows Specification",
+  "description": "UI flows and step transitions",
+  "type": "object",
+  "required": ["flows"],
+  "properties": {
+    "flows": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/flow" }
+    }
+  },
+  "definitions": {
+    "flow": {
+      "type": "object",
+      "required": ["name", "steps"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "entry_point": {
+          "type": "boolean",
+          "default": false,
+          "description": "Is this a main navigation entry point"
+        },
+        "icon": { "type": "string" },
+        "auth": {
+          "type": "object",
+          "properties": {
+            "required": { "type": "boolean", "default": true },
+            "roles": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "steps": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/step" }
+        },
+        "initial_step": { "type": "string" }
+      }
+    },
+    "step": {
+      "type": "object",
+      "required": ["screen"],
+      "properties": {
+        "screen": {
+          "type": "string",
+          "description": "Reference to UI screen"
+        },
+        "title": { "type": "string" },
+        "transitions": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/transition" }
+        },
+        "on_enter": {
+          "type": "object",
+          "properties": {
+            "action": { "type": "string" },
+            "params": { "type": "object" }
+          }
+        },
+        "guards": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/guard" }
+        }
+      }
+    },
+    "transition": {
+      "type": "object",
+      "required": ["target"],
+      "properties": {
+        "target": { "type": "string" },
+        "action": {
+          "type": "string",
+          "description": "Action to execute on transition"
+        },
+        "condition": { "type": "string" },
+        "label": { "type": "string" }
+      }
+    },
+    "guard": {
+      "type": "object",
+      "required": ["condition"],
+      "properties": {
+        "condition": { "type": "string" },
+        "redirect": { "type": "string" },
+        "message": { "type": "string" }
+      }
+    }
+  }
+}

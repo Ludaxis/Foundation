@@ -1,0 +1,40 @@
+{
+  "name": "foundation-dev",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Production-ready monorepo framework for PM + AI to generate real MVPs from human-readable specs",
+  "license": "MIT",
+  "author": "Foundation Dev Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/foundation-dev/foundation"
+  },
+  "workspaces": [
+    "tools/fd",
+    "packages/*",
+    "apps/*",
+    "services/*"
+  ],
+  "scripts": {
+    "fd": "node tools/fd/dist/cli.js",
+    "build": "pnpm -r build",
+    "build:tools": "pnpm --filter @foundation/fd build",
+    "dev": "pnpm fd run",
+    "test": "pnpm -r test",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write .",
+    "clean": "pnpm -r clean && rm -rf node_modules .fd/cache",
+    "prepare": "pnpm build:tools"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}

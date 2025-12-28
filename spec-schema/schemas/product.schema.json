@@ -1,0 +1,136 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://foundation.dev/schemas/product.schema.json",
+  "title": "Product Specification",
+  "description": "Root product configuration for Foundation Dev",
+  "type": "object",
+  "required": ["name", "version", "tenancy", "profile"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Product name",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "minLength": 2,
+      "maxLength": 50
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "tenancy": {
+      "type": "object",
+      "required": ["mode", "isolation"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["single", "multi"],
+          "description": "Single or multi-tenant deployment"
+        },
+        "isolation": {
+          "type": "string",
+          "enum": ["row", "schema", "database"],
+          "description": "Data isolation strategy for multi-tenant"
+        },
+        "tenant_id_column": {
+          "type": "string",
+          "default": "tenant_id",
+          "description": "Column name for tenant isolation"
+        }
+      }
+    },
+    "profile": {
+      "type": "string",
+      "enum": ["dev", "prod"],
+      "description": "Current deployment profile"
+    },
+    "profiles": {
+      "type": "object",
+      "properties": {
+        "dev": { "$ref": "#/definitions/profileConfig" },
+        "prod": { "$ref": "#/definitions/profileConfig" }
+      }
+    },
+    "auth": {
+      "type": "object",
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": ["demo", "clerk", "auth0", "supabase", "custom"],
+          "default": "demo"
+        },
+        "session_duration": {
+          "type": "string",
+          "pattern": "^\\d+[hdm]$",
+          "default": "24h"
+        },
+        "require_mfa": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "defaults": {
+      "type": "object",
+      "properties": {
+        "pagination": {
+          "type": "object",
+          "properties": {
+            "page_size": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 },
+            "max_page_size": { "type": "integer", "minimum": 1, "maximum": 1000, "default": 100 }
+          }
+        },
+        "rate_limits": {
+          "type": "object",
+          "properties": {
+            "default_rpm": { "type": "integer", "default": 60 },
+            "default_burst": { "type": "integer", "default": 10 }
+          }
+        },
+        "audit": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean", "default": true },
+            "retention_days": { "type": "integer", "default": 90 }
+          }
+        }
+      }
+    },
+    "features": {
+      "type": "object",
+      "properties": {
+        "ai_suggestions": { "type": "boolean", "default": false },
+        "file_uploads": { "type": "boolean", "default": false },
+        "background_jobs": { "type": "boolean", "default": false },
+        "real_time": { "type": "boolean", "default": false }
+      }
+    }
+  },
+  "definitions": {
+    "profileConfig": {
+      "type": "object",
+      "properties": {
+        "require_idempotency": {
+          "type": "boolean",
+          "description": "Commands must include idempotency keys"
+        },
+        "require_rate_limits": {
+          "type": "boolean",
+          "description": "All actions must have rate limits defined"
+        },
+        "strict_tenancy": {
+          "type": "boolean",
+          "description": "Enforce tenant isolation on all queries"
+        },
+        "audit_level": {
+          "type": "string",
+          "enum": ["none", "commands", "all"]
+        }
+      }
+    }
+  }
+}

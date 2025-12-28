@@ -1,0 +1,43 @@
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@8 --activate
+
+# Copy workspace files
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml* ./
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/sdk/package.json ./packages/sdk/
+COPY apps/web/package.json ./apps/web/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy source
+COPY packages/ui ./packages/ui
+COPY packages/sdk ./packages/sdk
+COPY apps/web ./apps/web
+COPY tsconfig.base.json ./
+
+# Build
+RUN pnpm --filter @foundation/ui build
+RUN pnpm --filter @foundation/sdk build
+RUN pnpm --filter @foundation/web build
+
+# Production image
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy built Next.js app
+COPY --from=builder /app/apps/web/.next/standalone ./
+COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder /app/apps/web/public ./apps/web/public
+
+ENV NODE_ENV=production
+ENV PORT=3000
+
+EXPOSE 3000
+
+CMD ["node", "apps/web/server.js"]
