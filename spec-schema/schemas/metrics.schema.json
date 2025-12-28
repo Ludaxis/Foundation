@@ -1,0 +1,178 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://foundation.dev/schemas/metrics.schema.json",
+  "title": "Metrics Specification",
+  "description": "Events, KPIs, and observability definitions",
+  "type": "object",
+  "properties": {
+    "events": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/event" }
+    },
+    "kpis": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/kpi" }
+    },
+    "dashboards": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/dashboard" }
+    },
+    "alerts": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/alert" }
+    }
+  },
+  "definitions": {
+    "event": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "category": {
+          "type": "string",
+          "enum": ["user", "system", "business", "error"]
+        },
+        "triggered_by": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Actions that trigger this event"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "description": { "type": "string" },
+              "required": { "type": "boolean" }
+            }
+          }
+        },
+        "retention_days": { "type": "integer", "default": 90 }
+      }
+    },
+    "kpi": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["count", "sum", "average", "ratio", "percentile", "unique"]
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "event": { "type": "string" },
+            "entity": { "type": "string" },
+            "field": { "type": "string" }
+          }
+        },
+        "filter": { "type": "string" },
+        "group_by": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "time_window": {
+          "type": "string",
+          "enum": ["hour", "day", "week", "month", "quarter", "year"]
+        },
+        "format": {
+          "type": "string",
+          "enum": ["number", "currency", "percentage", "duration"]
+        },
+        "target": {
+          "type": "object",
+          "properties": {
+            "value": { "type": "number" },
+            "direction": {
+              "type": "string",
+              "enum": ["up", "down"]
+            }
+          }
+        }
+      }
+    },
+    "dashboard": {
+      "type": "object",
+      "required": ["name", "widgets"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "access": {
+          "type": "object",
+          "properties": {
+            "roles": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "widgets": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/widget" }
+        },
+        "refresh_interval": { "type": "integer" }
+      }
+    },
+    "widget": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["metric", "chart", "table", "list", "status"]
+        },
+        "title": { "type": "string" },
+        "kpi": { "type": "string" },
+        "chart_type": {
+          "type": "string",
+          "enum": ["line", "bar", "pie", "area", "donut"]
+        },
+        "size": {
+          "type": "string",
+          "enum": ["small", "medium", "large", "full"]
+        },
+        "position": {
+          "type": "object",
+          "properties": {
+            "row": { "type": "integer" },
+            "col": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "alert": {
+      "type": "object",
+      "required": ["kpi", "condition"],
+      "properties": {
+        "name": { "type": "string" },
+        "kpi": { "type": "string" },
+        "condition": {
+          "type": "object",
+          "properties": {
+            "operator": {
+              "type": "string",
+              "enum": ["gt", "gte", "lt", "lte", "eq", "neq"]
+            },
+            "threshold": { "type": "number" },
+            "duration": { "type": "string" }
+          }
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["info", "warning", "error", "critical"]
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["email", "slack", "pagerduty", "webhook"]
+          }
+        }
+      }
+    }
+  }
+}

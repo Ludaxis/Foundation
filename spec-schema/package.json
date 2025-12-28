@@ -1,0 +1,11 @@
+{
+  "name": "@foundation/spec-schema",
+  "version": "0.1.0",
+  "private": true,
+  "description": "JSON Schema definitions for Product Spec Language (PSL)",
+  "main": "./schemas/index.json",
+  "files": ["schemas"],
+  "scripts": {
+    "validate": "ajv compile -s schemas/*.json"
+  }
+}

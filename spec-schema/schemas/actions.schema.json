@@ -1,0 +1,227 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://foundation.dev/schemas/actions.schema.json",
+  "title": "Actions Specification",
+  "description": "Commands and queries definitions",
+  "type": "object",
+  "required": ["actions"],
+  "properties": {
+    "actions": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/action" }
+    }
+  },
+  "definitions": {
+    "action": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["command", "query"],
+          "description": "Commands mutate state, queries read only"
+        },
+        "description": { "type": "string" },
+        "entity": {
+          "type": "string",
+          "description": "Primary entity this action operates on"
+        },
+        "async": {
+          "type": "boolean",
+          "default": false,
+          "description": "Execute as background job"
+        },
+        "idempotent": {
+          "type": "boolean",
+          "description": "Whether action is idempotent (required for commands in prod)"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "description": "Field path for idempotency key"
+        },
+        "input": {
+          "$ref": "#/definitions/inputSchema"
+        },
+        "output": {
+          "$ref": "#/definitions/outputSchema"
+        },
+        "auth": {
+          "type": "object",
+          "properties": {
+            "required": { "type": "boolean", "default": true },
+            "roles": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "permissions": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "rate_limit": {
+          "type": "object",
+          "properties": {
+            "requests_per_minute": { "type": "integer" },
+            "burst": { "type": "integer" },
+            "scope": {
+              "type": "string",
+              "enum": ["user", "tenant", "global"],
+              "default": "user"
+            }
+          }
+        },
+        "ai_rules": {
+          "type": "object",
+          "properties": {
+            "allowed": { "type": "boolean", "default": true },
+            "suggest_only": {
+              "type": "boolean",
+              "default": false,
+              "description": "AI can only suggest, human must approve"
+            },
+            "max_per_session": { "type": "integer" },
+            "require_confirmation": { "type": "boolean" }
+          }
+        },
+        "audit": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean", "default": true },
+            "include_input": { "type": "boolean", "default": true },
+            "include_output": { "type": "boolean", "default": false },
+            "sensitive_fields": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "track": { "type": "boolean", "default": true },
+            "custom_dimensions": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "hooks": {
+          "type": "object",
+          "properties": {
+            "before": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "after": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "on_error": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "triggers_job": {
+          "type": "string",
+          "description": "Job to trigger after successful execution"
+        }
+      }
+    },
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "fields": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/inputField" }
+        },
+        "validation": {
+          "type": "object",
+          "properties": {
+            "rules": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/validationRule" }
+            }
+          }
+        }
+      }
+    },
+    "inputField": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "string", "text", "integer", "float", "decimal", "boolean",
+            "date", "datetime", "uuid", "enum", "array", "object", "file"
+          ]
+        },
+        "required": { "type": "boolean", "default": false },
+        "description": { "type": "string" },
+        "default": {},
+        "enum_values": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "array_of": { "type": "string" },
+        "object_schema": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/inputField" }
+        },
+        "validation": {
+          "type": "object",
+          "properties": {
+            "min": { "type": "number" },
+            "max": { "type": "number" },
+            "min_length": { "type": "integer" },
+            "max_length": { "type": "integer" },
+            "pattern": { "type": "string" },
+            "format": { "type": "string" }
+          }
+        },
+        "file_config": {
+          "type": "object",
+          "properties": {
+            "max_size_mb": { "type": "number" },
+            "allowed_types": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["entity", "list", "object", "void"]
+        },
+        "entity": { "type": "string" },
+        "fields": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/outputField" }
+        },
+        "pagination": { "type": "boolean" }
+      }
+    },
+    "outputField": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "description": { "type": "string" }
+      }
+    },
+    "validationRule": {
+      "type": "object",
+      "required": ["expression", "message"],
+      "properties": {
+        "expression": { "type": "string" },
+        "message": { "type": "string" }
+      }
+    }
+  }
+}

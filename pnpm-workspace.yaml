@@ -1,0 +1,5 @@
+packages:
+  - 'tools/fd'
+  - 'packages/*'
+  - 'apps/*'
+  - 'services/*'

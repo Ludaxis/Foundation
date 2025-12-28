@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://foundation.dev/schemas/jobs.schema.json",
+  "title": "Jobs Specification",
+  "description": "Background job definitions",
+  "type": "object",
+  "properties": {
+    "jobs": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/job" }
+    },
+    "queues": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/queue" }
+    }
+  },
+  "definitions": {
+    "job": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "queue": { "type": "string", "default": "default" },
+        "input": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "required": { "type": "boolean" }
+            }
+          }
+        },
+        "retry": {
+          "type": "object",
+          "properties": {
+            "attempts": { "type": "integer", "default": 3 },
+            "backoff": {
+              "type": "string",
+              "enum": ["fixed", "exponential"],
+              "default": "exponential"
+            },
+            "delay": { "type": "integer", "default": 1000 }
+          }
+        },
+        "timeout": { "type": "integer", "description": "Timeout in milliseconds" },
+        "concurrency": { "type": "integer", "default": 1 },
+        "rate_limit": {
+          "type": "object",
+          "properties": {
+            "max": { "type": "integer" },
+            "duration": { "type": "integer" }
+          }
+        },
+        "cron": {
+          "type": "string",
+          "description": "Cron schedule for recurring jobs"
+        },
+        "triggers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Actions that trigger this job"
+        },
+        "dead_letter_queue": { "type": "string" },
+        "hooks": {
+          "type": "object",
+          "properties": {
+            "on_complete": { "type": "string" },
+            "on_failure": { "type": "string" }
+          }
+        }
+      }
+    },
+    "queue": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "concurrency": { "type": "integer", "default": 5 },
+        "priority": { "type": "integer", "default": 0 },
+        "rate_limit": {
+          "type": "object",
+          "properties": {
+            "max": { "type": "integer" },
+            "duration": { "type": "integer" }
+          }
+        }
+      }
+    }
+  }
+}

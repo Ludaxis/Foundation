@@ -1,0 +1,181 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://foundation.dev/schemas/policies.schema.json",
+  "title": "Policies Specification",
+  "description": "RBAC, ABAC, rate limits, and AI write rules",
+  "type": "object",
+  "properties": {
+    "roles": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/role" }
+    },
+    "permissions": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/permission" }
+    },
+    "policies": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/policy" }
+    },
+    "rate_limits": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/rateLimit" }
+    },
+    "ai_rules": {
+      "type": "object",
+      "properties": {
+        "global": { "$ref": "#/definitions/aiGlobalRules" },
+        "entities": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/aiEntityRules" }
+        },
+        "actions": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/aiActionRules" }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "role": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "inherits": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "permissions": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "can": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Actions this role can perform"
+        }
+      }
+    },
+    "permission": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "resource": { "type": "string" },
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["create", "read", "update", "delete", "list", "*"]
+          }
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "required": ["resource"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "resource": { "type": "string" },
+        "action": {
+          "type": "string",
+          "enum": ["create", "read", "update", "delete", "list", "*"]
+        },
+        "effect": {
+          "type": "string",
+          "enum": ["allow", "deny"],
+          "default": "allow"
+        },
+        "conditions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/condition" }
+        },
+        "filter": {
+          "type": "string",
+          "description": "Row-level filter expression for list/read"
+        },
+        "priority": {
+          "type": "integer",
+          "default": 0
+        }
+      }
+    },
+    "condition": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["allow_if", "deny_if", "require"]
+        },
+        "expression": { "type": "string" },
+        "message": { "type": "string" }
+      }
+    },
+    "rateLimit": {
+      "type": "object",
+      "required": ["requests_per_minute"],
+      "properties": {
+        "requests_per_minute": { "type": "integer" },
+        "burst": { "type": "integer" },
+        "scope": {
+          "type": "string",
+          "enum": ["user", "tenant", "ip", "global"],
+          "default": "user"
+        },
+        "key": {
+          "type": "string",
+          "description": "Custom key expression"
+        },
+        "applies_to": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Action names this limit applies to"
+        }
+      }
+    },
+    "aiGlobalRules": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "max_actions_per_session": { "type": "integer" },
+        "require_human_review": {
+          "type": "boolean",
+          "default": false,
+          "description": "All AI actions require human approval"
+        },
+        "blocked_actions": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "aiEntityRules": {
+      "type": "object",
+      "properties": {
+        "readable": { "type": "boolean", "default": true },
+        "writable": { "type": "boolean", "default": true },
+        "suggest_only": {
+          "type": "boolean",
+          "default": false,
+          "description": "AI can only suggest changes, human must approve"
+        },
+        "require_confirmation": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "aiActionRules": {
+      "type": "object",
+      "properties": {
+        "allowed": { "type": "boolean", "default": true },
+        "suggest_only": { "type": "boolean", "default": false },
+        "max_per_session": { "type": "integer" },
+        "require_confirmation": { "type": "boolean" }
+      }
+    }
+  }
+}
